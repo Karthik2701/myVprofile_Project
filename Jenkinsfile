@@ -12,7 +12,7 @@ pipeline {
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "172.31.31.34:8081"
         NEXUS_REPOSITORY = "vprofile-release"
-	      NEXUS_REPOGRP_ID    = "vpro-maven-group"
+	NEXUS_REPOGRP_ID    = "vpro-maven-group"
         NEXUS_CREDENTIAL_ID = "nexus_login"
         ARTVERSION = "${env.BUILD_ID}"
         ACCESS_KEY = credentials('AWS_ACCESS_KEY_ID')
@@ -125,24 +125,24 @@ pipeline {
                 """
             }
         }
-        stage('Docker : MYSQL DB Image Building'){
-            steps{
-                sh """
-                cd Docker-files/db/
-                docker build -t vikashashoke/vprofiledb:v1.$BUILD_ID .
-                docker image tag vikashashoke/vprofiledb:v1.$BUILD_ID vikashashoke/vprofiledb:latest
-                """
-            }
-        }
-        stage('Docker : WEB(nginx) Image Building'){
-            steps{
-                sh """
-                cd Docker-files/web/
-                docker build -t vikashashoke/vprofileweb:v1.$BUILD_ID .
-                docker image tag vikashashoke/vprofileweb:v1.$BUILD_ID vikashashoke/vprofileweb:latest
-                """
-            }
-        } 
+//         stage('Docker : MYSQL DB Image Building'){
+//             steps{
+//                 sh """
+//                 cd Docker-files/db/
+//                 docker build -t vikashashoke/vprofiledb:v1.$BUILD_ID .
+//                 docker image tag vikashashoke/vprofiledb:v1.$BUILD_ID vikashashoke/vprofiledb:latest
+//                 """
+//             }
+//         }
+//         stage('Docker : WEB(nginx) Image Building'){
+//             steps{
+//                 sh """
+//                 cd Docker-files/web/
+//                 docker build -t vikashashoke/vprofileweb:v1.$BUILD_ID .
+//                 docker image tag vikashashoke/vprofileweb:v1.$BUILD_ID vikashashoke/vprofileweb:latest
+//                 """
+//             }
+//         } 
         stage('Docker : Image push to DockerHUB '){
             steps{
                 
@@ -153,16 +153,17 @@ pipeline {
                 echo pushing web images ...
                 docker image push vikashashoke/vprofileweb:v1.$BUILD_ID 
                 docker image push vikashashoke/vprofileweb:latest
+		
+		"""
                 
-                echo pushing DB images ...
-                docker image push vikashashoke/vprofiledb:v1.$BUILD_ID
-                docker image push vikashashoke/vprofiledb:latest     
+//                 echo pushing DB images ...
+//                 docker image push vikashashoke/vprofiledb:v1.$BUILD_ID
+//                 docker image push vikashashoke/vprofiledb:latest     
                 
-                echo pushing Web images ...
-                docker image push vikashashoke/vprofileapp:v1.$BUILD_ID
-                docker image push vikashashoke/vprofileapp:latest                
+//                 echo pushing Web images ...
+//                 docker image push vikashashoke/vprofileapp:v1.$BUILD_ID
+//                 docker image push vikashashoke/vprofileapp:latest                
                 
-                """
             }
           }
         } 
@@ -171,11 +172,11 @@ pipeline {
                 sh """
                 docker image rm vikashashoke/vprofileapp:v1.$BUILD_ID
                 docker image rm vikashashoke/vprofileapp:latest
-                docker image rm vikashashoke/vprofiledb:v1.$BUILD_ID
-                docker image rm vikashashoke/vprofiledb:latest
-                docker image rm vikashashoke/vprofileweb:v1.$BUILD_ID
-                docker image rm vikashashoke/vprofileweb:latest
-                """
+		"""
+//                 docker image rm vikashashoke/vprofiledb:v1.$BUILD_ID
+//                 docker image rm vikashashoke/vprofiledb:latest
+//                 docker image rm vikashashoke/vprofileweb:v1.$BUILD_ID
+//                 docker image rm vikashashoke/vprofileweb:latest
             }
         }
         stage('Authenticating to eks cluster...'){
