@@ -4,7 +4,7 @@ pipeline {
 
     parameters{
         choice(name: 'action', choices: 'create\ndestroy', description: 'Create/update or destroy the Deployment & SVC.')
-        string(name: 'cluster', defaultValue : 'demo-cluster', description: "EKS cluster name.")
+        string(name: 'cluster', defaultValue : 'democluster', description: "EKS cluster name.")
         string(name: 'region', defaultValue : 'us-east-1', description: "AWS region.")
     }
     environment {
@@ -179,7 +179,7 @@ pipeline {
 //                 docker image rm vikashashoke/vprofileweb:latest
             }
         }
-        stage('Authenticating to eks cluster...'){
+        stage('Connection to cluster'){
             steps{
                 sh """
                 aws configure set aws_access_key_id "$ACCESS_KEY"
@@ -187,32 +187,32 @@ pipeline {
                 aws configure set region "${params.region}"
                 
                 aws eks update-kubeconfig --name ${params.cluster} --region ${params.region}
-                """
+                
+                 """
             }
-        }
+        } 
         stage('Deployment on Eks Cluster'){
              when {
               expression { params.action == 'create' }
           }
              steps{
-               sh """
-                 kubectl apply -f Deployment.yml
-                 kubectl apply -f Service.yml
-               """
-             }
+                sh """
+                 cd kubefiles/
+                  kubectl apply -f .
+                 """
+                 }
         }
         stage('Delete Deployment on Eks Cluster'){
              when {
-               expression { params.action == 'destroy' }
+              expression { params.action == 'destroy' }
              }
              steps{
-               sh """
-                 kubectl delete -f Deployment.yml
-                 kubectl delete -f Service.yml
-               """
+                sh """
+                  cd kubefiles/
+                  kubectl delete -f .
+                  """
              }
-        }
-
+        }     
     }
 }
 
