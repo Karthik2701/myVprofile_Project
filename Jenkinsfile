@@ -150,9 +150,9 @@ pipeline {
                 sh """
                 
                 docker login -u vikashashoke -p ${docker_cred}
-                echo pushing web images ...
-                docker image push vikashashoke/vprofileweb:v1.$BUILD_ID 
-                docker image push vikashashoke/vprofileweb:latest
+                echo pushing latest app images ...
+                docker image push vikashashoke/vprofileapp:v1.$BUILD_ID 
+                docker image push vikashashoke/vprofileapp:latest
 		
 		"""
                 
