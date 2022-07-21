@@ -22,6 +22,9 @@ pipeline {
     stages{
 
         stage('BUILD'){
+	     when {
+              expression { params.action == 'create' }
+          }
             steps {
                 sh 'mvn clean install -DskipTests'
             }
@@ -34,18 +37,27 @@ pipeline {
         }
 
         stage('UNIT TEST'){
+	     when {
+              expression { params.action == 'create' }
+          }
             steps {
                 sh 'mvn test'
             }
         }
 
         stage('INTEGRATION TEST'){
+	     when {
+              expression { params.action == 'create' }
+           }
             steps {
                 sh 'mvn verify -DskipUnitTests'
             }
         }
 
         stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+	     when {
+              expression { params.action == 'create' }
+            }
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
@@ -57,6 +69,9 @@ pipeline {
         }
 
         stage('CODE ANALYSIS with SONARQUBE') {
+	    when {
+              expression { params.action == 'create' }
+           }
 
             environment {
                 scannerHome = tool 'mysonarscanner4'
@@ -81,6 +96,9 @@ pipeline {
         }
 
         stage("Publish to Nexus Repository Manager") {
+	     when {
+              expression { params.action == 'create' }
+           }
             steps {
                 script {
                     pom = readMavenPom file: "pom.xml";
@@ -117,6 +135,9 @@ pipeline {
             }
         }
         stage('Docker : App Image Building'){
+	     when {
+              expression { params.action == 'create' }
+          }
             steps{
                 sh """
                 cd Docker-files/app/multistage/
@@ -144,6 +165,9 @@ pipeline {
 //             }
 //         } 
         stage('Docker : Image push to DockerHUB '){
+	     when {
+              expression { params.action == 'create' }
+          }
             steps{
                 
                 withCredentials([string(credentialsId: 'dockerHub_passwd', variable: 'docker_cred')]) {
@@ -168,6 +192,9 @@ pipeline {
           }
         } 
         stage('Docker : App Image Removal'){
+	     when {
+              expression { params.action == 'create' }
+           }
             steps{
                 sh """
                 docker image rm vikashashoke/vprofileapp:v1.$BUILD_ID
@@ -180,6 +207,9 @@ pipeline {
             }
         }
         stage('Connection to cluster'){
+	    when {
+              expression { params.action == 'create' }
+          }
             steps{
                 sh """
                 aws configure set aws_access_key_id "$ACCESS_KEY"
