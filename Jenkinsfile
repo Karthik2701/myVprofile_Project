@@ -140,8 +140,6 @@ pipeline {
           }
             steps{
                 sh """
-		apt install docker -y
-		chmod 777 var/run/docker.sock
                 cd Docker-files/app/multistage/
                 docker build -t vikashashoke/vprofileapp:v1.$BUILD_ID .
                 docker image tag vikashashoke/vprofileapp:v1.$BUILD_ID vikashashoke/vprofileapp:latest
