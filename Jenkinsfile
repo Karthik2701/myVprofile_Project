@@ -21,59 +21,59 @@ pipeline {
 
     stages{
 
-        stage('BUILD'){
-	     when {
-              expression { params.action == 'create' }
-          }
-            steps {
-                sh 'mvn clean install -DskipTests'
-            }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.war'
-                }
-            }
-        }
+//         stage('BUILD'){
+// 	     when {
+//               expression { params.action == 'create' }
+//           }
+//             steps {
+//                 sh 'mvn clean install -DskipTests'
+//             }
+//             post {
+//                 success {
+//                     echo 'Now Archiving...'
+//                     archiveArtifacts artifacts: '**/target/*.war'
+//                 }
+//             }
+//         }
 
-        stage('UNIT TEST'){
-	     when {
-              expression { params.action == 'create' }
-          }
-            steps {
-                sh 'mvn test'
-            }
-        }
+//         stage('UNIT TEST'){
+// 	     when {
+//               expression { params.action == 'create' }
+//           }
+//             steps {
+//                 sh 'mvn test'
+//             }
+//         }
 
-        stage('INTEGRATION TEST'){
-	     when {
-              expression { params.action == 'create' }
-           }
-            steps {
-                sh 'mvn verify -DskipUnitTests'
-            }
-        }
+//         stage('INTEGRATION TEST'){
+// 	     when {
+//               expression { params.action == 'create' }
+//            }
+//             steps {
+//                 sh 'mvn verify -DskipUnitTests'
+//             }
+//         }
 	    
-	stage('OWASP CHECK'){
-		steps{
-		   dependencyCheck additionalArguments: '', odcInstallation: 'owasp-7.1.1'
-                   dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-		}    
-	    }
+// 	stage('OWASP CHECK'){
+// 		steps{
+// 		   dependencyCheck additionalArguments: '', odcInstallation: 'owasp-7.1.1'
+//                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+// 		}    
+// 	    }
 
-        stage ('CODE ANALYSIS WITH CHECKSTYLE'){
-	     when {
-              expression { params.action == 'create' }
-            }
-            steps {
-                sh 'mvn checkstyle:checkstyle'
-            }
-            post {
-                success {
-                    echo 'Generated Analysis Result'
-                }
-            }
-        }
+//         stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+// 	     when {
+//               expression { params.action == 'create' }
+//             }
+//             steps {
+//                 sh 'mvn checkstyle:checkstyle'
+//             }
+//             post {
+//                 success {
+//                     echo 'Generated Analysis Result'
+//                 }
+//             }
+//         }
 
         stage('CODE ANALYSIS with SONARQUBE') {
 	    when {
