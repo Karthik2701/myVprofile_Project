@@ -104,105 +104,80 @@ pipeline {
 //         }
 
 
-        stage("Publish to Nexus Repository Manager") {
-	     when {
-              expression { params.action == 'create' }
-           }
-            steps {
-                script {
-                    pom = readMavenPom file: "pom.xml";
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    artifactPath = filesByGlob[0].path;
-                    artifactExists = fileExists artifactPath;
-                    if(artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
-                        nexusArtifactUploader(
-                                nexusVersion: NEXUS_VERSION,
-                                protocol: NEXUS_PROTOCOL,
-                                nexusUrl: NEXUS_URL,
-                                groupId: pom.groupId,
-                                version: ARTVERSION,
-                                repository: NEXUS_REPOSITORY,
-                                credentialsId: NEXUS_CREDENTIAL_ID,
-                                artifacts: [
-                                        [artifactId: pom.artifactId,
-                                         classifier: '',
-                                         file: artifactPath,
-                                         type: pom.packaging],
-                                        [artifactId: pom.artifactId,
-                                         classifier: '',
-                                         file: "pom.xml",
-                                         type: "pom"]
-                                ]
-                        );
-                    }
-                    else {
-                        error "*** File: ${artifactPath}, could not be found";
-                    }
-                }
-            }
-        }
-        stage('Docker : App Image Building'){
-	     when {
-              expression { params.action == 'create' }
-          }
-            steps{
-                sh """
-                cd Docker-files/app/multistage/
-                docker build -t vikashashoke/vprofileapp:v1.$BUILD_ID .
-                docker image tag vikashashoke/vprofileapp:v1.$BUILD_ID vikashashoke/vprofileapp:latest
-                """
-            }
-        }
-//         stage('Docker : MYSQL DB Image Building'){
+//         stage("Publish to Nexus Repository Manager") {
+// 	     when {
+//               expression { params.action == 'create' }
+//            }
+//             steps {
+//                 script {
+//                     pom = readMavenPom file: "pom.xml";
+//                     filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+//                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+//                     artifactPath = filesByGlob[0].path;
+//                     artifactExists = fileExists artifactPath;
+//                     if(artifactExists) {
+//                         echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
+//                         nexusArtifactUploader(
+//                                 nexusVersion: NEXUS_VERSION,
+//                                 protocol: NEXUS_PROTOCOL,
+//                                 nexusUrl: NEXUS_URL,
+//                                 groupId: pom.groupId,
+//                                 version: ARTVERSION,
+//                                 repository: NEXUS_REPOSITORY,
+//                                 credentialsId: NEXUS_CREDENTIAL_ID,
+//                                 artifacts: [
+//                                         [artifactId: pom.artifactId,
+//                                          classifier: '',
+//                                          file: artifactPath,
+//                                          type: pom.packaging],
+//                                         [artifactId: pom.artifactId,
+//                                          classifier: '',
+//                                          file: "pom.xml",
+//                                          type: "pom"]
+//                                 ]
+//                         );
+//                     }
+//                     else {
+//                         error "*** File: ${artifactPath}, could not be found";
+//                     }
+//                 }
+//             }
+//         }
+//         stage('Docker : App Image Building'){
+// 	     when {
+//               expression { params.action == 'create' }
+//           }
 //             steps{
 //                 sh """
-//                 cd Docker-files/db/
-//                 docker build -t vikashashoke/vprofiledb:v1.$BUILD_ID .
-//                 docker image tag vikashashoke/vprofiledb:v1.$BUILD_ID vikashashoke/vprofiledb:latest
+//                 cd Docker-files/app/multistage/
+//                 docker build -t vikashashoke/vprofileapp:v1.$BUILD_ID .
+//                 docker image tag vikashashoke/vprofileapp:v1.$BUILD_ID vikashashoke/vprofileapp:latest
 //                 """
 //             }
 //         }
-//         stage('Docker : WEB(nginx) Image Building'){
+
+//         stage('Docker : Image push to DockerHUB '){
+// 	     when {
+//               expression { params.action == 'create' }
+//           }
 //             steps{
+                
+//                 withCredentials([string(credentialsId: 'dockerHub_passwd', variable: 'docker_cred')]) {
 //                 sh """
-//                 cd Docker-files/web/
-//                 docker build -t vikashashoke/vprofileweb:v1.$BUILD_ID .
-//                 docker image tag vikashashoke/vprofileweb:v1.$BUILD_ID vikashashoke/vprofileweb:latest
-//                 """
-//             }
-//         } 
-        stage('Docker : Image push to DockerHUB '){
-	     when {
-              expression { params.action == 'create' }
-          }
-            steps{
                 
-                withCredentials([string(credentialsId: 'dockerHub_passwd', variable: 'docker_cred')]) {
-                sh """
-                
-                docker login -u vikashashoke -p ${docker_cred}
-                echo pushing latest app images ...
-                docker image push vikashashoke/vprofileapp:v1.$BUILD_ID 
-                docker image push vikashashoke/vprofileapp:latest
-		 echo 'docker local image removal'
-		docker image rm vikashashoke/vprofileapp:v1.$BUILD_ID
-                docker image rm vikashashoke/vprofileapp:latest
+//                 docker login -u vikashashoke -p ${docker_cred}
+//                 echo pushing latest app images ...
+//                 docker image push vikashashoke/vprofileapp:v1.$BUILD_ID 
+//                 docker image push vikashashoke/vprofileapp:latest
+// 		 echo 'docker local image removal'
+// 		docker image rm vikashashoke/vprofileapp:v1.$BUILD_ID
+//                 docker image rm vikashashoke/vprofileapp:latest
 		
-		"""
-                
-//                 echo pushing DB images ...
-//                 docker image push vikashashoke/vprofiledb:v1.$BUILD_ID
-//                 docker image push vikashashoke/vprofiledb:latest     
-                
-//                 echo pushing Web images ...
-//                 docker image push vikashashoke/vprofileapp:v1.$BUILD_ID
-//                 docker image push vikashashoke/vprofileapp:latest                
-                
-            }
-          }
-        } 
+// 		"""
+                            
+//             }
+//           }
+//         } 
 //         stage('Docker : App Image Removal'){
 // 	     when {
 //               expression { params.action == 'create' }
@@ -217,45 +192,45 @@ pipeline {
 // //                 docker image rm vikashashoke/vprofileweb:latest
 //             }
 //         }
-        stage('Connection to cluster'){
-	    when {
-              expression { params.action == 'create' }
-          }
-            steps{
-                sh """
-                aws configure set aws_access_key_id "$ACCESS_KEY"
-                aws configure set aws_secret_access_key "$SECRET_KEY"
-                aws configure set region "${params.region}"
+//         stage('Connection to cluster'){
+// 	    when {
+//               expression { params.action == 'create' }
+//           }
+//             steps{
+//                 sh """
+//                 aws configure set aws_access_key_id "$ACCESS_KEY"
+//                 aws configure set aws_secret_access_key "$SECRET_KEY"
+//                 aws configure set region "${params.region}"
                 
-                aws eks update-kubeconfig --name ${params.cluster} --region ${params.region}
+//                 aws eks update-kubeconfig --name ${params.cluster} --region ${params.region}
                 
-                 """
-            }
-        } 
-        stage('Deployment on Eks Cluster'){
-             when {
-              expression { params.action == 'create' }
-          }
-             steps{
-                sh """
-                 cd kubefiles/
-                  kubectl apply -f .
-                 """
-                 }
-        }
-        stage('Delete Deployment on Eks Cluster'){
-             when {
-              expression { params.action == 'destroy' }
-             }
-             steps{
-                sh """
-                  cd kubefiles/
-                  kubectl delete -f .
-                  """
-             }
-        }     
-    }
-}
+//                  """
+//             }
+//         } 
+//         stage('Deployment on Eks Cluster'){
+//              when {
+//               expression { params.action == 'create' }
+//           }
+//              steps{
+//                 sh """
+//                  cd kubefiles/
+//                   kubectl apply -f .
+//                  """
+//                  }
+//         }
+//         stage('Delete Deployment on Eks Cluster'){
+//              when {
+//               expression { params.action == 'destroy' }
+//              }
+//              steps{
+//                 sh """
+//                   cd kubefiles/
+//                   kubectl delete -f .
+//                   """
+//              }
+//         }     
+//     }
+// }
 
 
 
