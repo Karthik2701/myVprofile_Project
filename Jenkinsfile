@@ -20,6 +20,12 @@ pipeline {
     }
 
     stages{
+	    
+	    stage('Git CheckOut'){
+		    steps{
+		       checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [[$class: 'WipeWorkspace']], userRemoteConfigs: [[url: 'https://github.com/vikash-kumar01/myVprofile_Project.git']]])
+		    }
+	    }
 
 //         stage('UNIT TEST'){
 // 	     when {
