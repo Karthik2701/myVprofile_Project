@@ -89,19 +89,19 @@ pipeline {
 		}    
 	    }
 
-//         stage ('CODE ANALYSIS WITH CHECKSTYLE'){
-// 	     when {
-//               expression { params.action == 'create' }
-//             }
-//             steps {
-//                 sh 'mvn checkstyle:checkstyle'
-//             }
-//             post {
-//                 success {
-//                     echo 'Generated Analysis Result'
-//                 }
-//             }
-//         }
+        stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+	     when {
+              expression { params.action == 'create' }
+            }
+            steps {
+                sh 'mvn checkstyle:checkstyle'
+            }
+            post {
+                success {
+                    echo 'Generated Analysis Result'
+                }
+            }
+        }
 
 
 //         stage("Publish to Nexus Repository Manager") {
