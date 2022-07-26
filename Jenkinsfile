@@ -84,7 +84,7 @@ pipeline {
 	stage('OWASP CHECK'){
 		steps{
 
-	        dependencyCheck additionalArguments: '--format JSON', odcInstallation: 'owasp-7.1.1'
+	        dependencyCheck additionalArguments: '--format JSON  --disableYarnAudit', odcInstallation: 'owasp-7.1.1'
                 recordIssues(tools: [checkStyle(id: 'CheckStyle-Issues', pattern: 'target/checkstyle-result.xml'), owaspDependencyCheck(id: 'OWASP-issues', pattern: 'dependency-check-report.json')])
 		}    
 	    }
