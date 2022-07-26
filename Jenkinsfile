@@ -21,59 +21,23 @@ pipeline {
 
     stages{
 
-//         stage('BUILD'){
-// 	     when {
-//               expression { params.action == 'create' }
-//           }
-//             steps {
-//                 sh 'mvn clean install -DskipTests'
-//             }
-//             post {
-//                 success {
-//                     echo 'Now Archiving...'
-//                     archiveArtifacts artifacts: '**/target/*.war'
-//                 }
-//             }
-//         }
+        stage('UNIT TEST'){
+	     when {
+              expression { params.action == 'create' }
+          }
+            steps {
+                sh 'mvn test'
+            }
+        }
 
-//         stage('UNIT TEST'){
-// 	     when {
-//               expression { params.action == 'create' }
-//           }
-//             steps {
-//                 sh 'mvn test'
-//             }
-//         }
-
-//         stage('INTEGRATION TEST'){
-// 	     when {
-//               expression { params.action == 'create' }
-//            }
-//             steps {
-//                 sh 'mvn verify -DskipUnitTests'
-//             }
-//         }
-	    
-// 	stage('OWASP CHECK'){
-// 		steps{
-// 		   dependencyCheck additionalArguments: '', odcInstallation: 'owasp-7.1.1'
-//                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-// 		}    
-// 	    }
-
-//         stage ('CODE ANALYSIS WITH CHECKSTYLE'){
-// 	     when {
-//               expression { params.action == 'create' }
-//             }
-//             steps {
-//                 sh 'mvn checkstyle:checkstyle'
-//             }
-//             post {
-//                 success {
-//                     echo 'Generated Analysis Result'
-//                 }
-//             }
-//         }
+        stage('INTEGRATION TEST'){
+	     when {
+              expression { params.action == 'create' }
+           }
+            steps {
+                sh 'mvn verify -DskipUnitTests'
+            }
+        }
 
         stage('CODE ANALYSIS with SONARQUBE') {
 	    when {
@@ -101,6 +65,43 @@ pipeline {
                 }
             }
         }
+	   
+        stage('BUILD'){
+	     when {
+              expression { params.action == 'create' }
+          }
+            steps {
+                sh 'mvn clean install -DskipTests'
+            }
+            post {
+                success {
+                    echo 'Now Archiving...'
+                    archiveArtifacts artifacts: '**/target/*.war'
+                }
+            }
+        }
+	    
+	stage('OWASP CHECK'){
+		steps{
+		   dependencyCheck additionalArguments: '', odcInstallation: 'owasp-7.1.1'
+                   dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+		}    
+	    }
+
+//         stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+// 	     when {
+//               expression { params.action == 'create' }
+//             }
+//             steps {
+//                 sh 'mvn checkstyle:checkstyle'
+//             }
+//             post {
+//                 success {
+//                     echo 'Generated Analysis Result'
+//                 }
+//             }
+//         }
+
 
         stage("Publish to Nexus Repository Manager") {
 	     when {
@@ -184,6 +185,9 @@ pipeline {
                 echo pushing latest app images ...
                 docker image push vikashashoke/vprofileapp:v1.$BUILD_ID 
                 docker image push vikashashoke/vprofileapp:latest
+		 echo 'docker local image removal'
+		docker image rm vikashashoke/vprofileapp:v1.$BUILD_ID
+                docker image rm vikashashoke/vprofileapp:latest
 		
 		"""
                 
@@ -198,21 +202,20 @@ pipeline {
             }
           }
         } 
-        stage('Docker : App Image Removal'){
-	     when {
-              expression { params.action == 'create' }
-           }
-            steps{
-                sh """
-                docker image rm vikashashoke/vprofileapp:v1.$BUILD_ID
-                docker image rm vikashashoke/vprofileapp:latest
-		"""
-//                 docker image rm vikashashoke/vprofiledb:v1.$BUILD_ID
-//                 docker image rm vikashashoke/vprofiledb:latest
-//                 docker image rm vikashashoke/vprofileweb:v1.$BUILD_ID
-//                 docker image rm vikashashoke/vprofileweb:latest
-            }
-        }
+//         stage('Docker : App Image Removal'){
+// 	     when {
+//               expression { params.action == 'create' }
+//            }
+//             steps{
+//                 sh """
+
+// 		"""
+// //                 docker image rm vikashashoke/vprofiledb:v1.$BUILD_ID
+// //                 docker image rm vikashashoke/vprofiledb:latest
+// //                 docker image rm vikashashoke/vprofileweb:v1.$BUILD_ID
+// //                 docker image rm vikashashoke/vprofileweb:latest
+//             }
+//         }
         stage('Connection to cluster'){
 	    when {
               expression { params.action == 'create' }
