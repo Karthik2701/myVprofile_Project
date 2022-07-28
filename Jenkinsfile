@@ -29,6 +29,7 @@ pipeline {
                 sh 'mvn test'
             }
         }
+   
 
         stage('INTEGRATION TEST'){
 
@@ -164,7 +165,7 @@ pipeline {
             }
           }
         } 
-
+    }
      }
  }
 
