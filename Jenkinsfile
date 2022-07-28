@@ -2,13 +2,12 @@ pipeline {
 
     agent any
 
-    }
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL =  "10.0.0.145:8081"
+        NEXUS_URL = "10.0.0.123:8081"
         NEXUS_REPOSITORY = "vprofile-release"
-	NEXUS_REPOGRP_ID    = "vpro-maven-group"
+	    NEXUS_REPOGRP_ID    = "vpro-maven-group"
         NEXUS_CREDENTIAL_ID = "nexus_login"
         ARTVERSION = "${env.BUILD_ID}"
         ACCESS_KEY = credentials('AWS_ACCESS_KEY_ID')
@@ -24,22 +23,18 @@ pipeline {
 	    }
 
         stage('UNIT TEST'){
-
             steps {
                 sh 'mvn test'
             }
         }
-   
 
         stage('INTEGRATION TEST'){
-
             steps {
                 sh 'mvn verify -DskipUnitTests'
             }
         }
 
         stage('CODE ANALYSIS with SONARQUBE') {
-
 
             environment {
                 scannerHome = tool 'mysonarscanner4'
@@ -164,24 +159,6 @@ pipeline {
                             
             }
           }
-      } 
-    }
+        }   
+     }
  }
-
-
-
-
-
-// SNAP-REPO=vprofile-snapshot
-// NEXUS-USER=admin
-// NEXUS-PASS=admin123
-// RELEASE-REPO=vprofile-release
-// CENTRAL-REPO=vpro-maven-central
-// NEXUS-GRP-REPO=vpro-maven-group
-// NEXUSIP=172.31.31.34
-// NEXUSPORT=8081
-// 62aad949f9852ec11205c13b3df2d1bd5feb56c1
-
-
-
-
