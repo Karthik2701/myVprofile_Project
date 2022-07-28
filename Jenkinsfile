@@ -2,15 +2,11 @@ pipeline {
 
     agent any
 
-    parameters{
-        choice(name: 'action', choices: 'create\ndestroy', description: 'Create/update or destroy the Deployment & SVC.')
-        string(name: 'cluster', defaultValue : 'democluster', description: "EKS cluster name.")
-        string(name: 'region', defaultValue : 'us-east-1', description: "AWS region.")
     }
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "10.0.0.123:8081"
+        NEXUS_URL =  "10.0.0.145:8081"
         NEXUS_REPOSITORY = "vprofile-release"
 	NEXUS_REPOGRP_ID    = "vpro-maven-group"
         NEXUS_CREDENTIAL_ID = "nexus_login"
@@ -28,27 +24,21 @@ pipeline {
 	    }
 
         stage('UNIT TEST'){
-	     when {
-              expression { params.action == 'create' }
-          }
+
             steps {
                 sh 'mvn test'
             }
         }
 
         stage('INTEGRATION TEST'){
-	     when {
-              expression { params.action == 'create' }
-           }
+
             steps {
                 sh 'mvn verify -DskipUnitTests'
             }
         }
 
         stage('CODE ANALYSIS with SONARQUBE') {
-	    when {
-              expression { params.action == 'create' }
-           }
+
 
             environment {
                 scannerHome = tool 'mysonarscanner4'
@@ -73,9 +63,7 @@ pipeline {
         }
 	   
         stage('BUILD'){
-	     when {
-              expression { params.action == 'create' }
-          }
+
             steps {
                 sh 'mvn clean install -DskipTests'
             }
@@ -96,9 +84,7 @@ pipeline {
 	    }
 
         stage ('CODE ANALYSIS WITH CHECKSTYLE'){
-	     when {
-              expression { params.action == 'create' }
-            }
+
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
@@ -111,9 +97,7 @@ pipeline {
 
 
         stage("Publish to Nexus Repository Manager") {
-	     when {
-              expression { params.action == 'create' }
-           }
+
             steps {
                 script {
                     pom = readMavenPom file: "pom.xml";
@@ -150,9 +134,7 @@ pipeline {
             }
         }
         stage('Docker : App Image Building'){
-	     when {
-              expression { params.action == 'create' }
-          }
+
             steps{
                 sh """
                 cd Docker-files/app/multistage/
@@ -163,9 +145,7 @@ pipeline {
         }
 
         stage('Docker : Image push to DockerHUB '){
-	     when {
-              expression { params.action == 'create' }
-          }
+
             steps{
                 
                 withCredentials([string(credentialsId: 'dockerHub_passwd', variable: 'docker_cred')]) {
@@ -185,43 +165,6 @@ pipeline {
           }
         } 
 
-//         stage('Connection to cluster'){
-// 	    when {
-//               expression { params.action == 'create' }
-//           }
-//             steps{
-//                 sh """
-//                 aws configure set aws_access_key_id "$ACCESS_KEY"
-//                 aws configure set aws_secret_access_key "$SECRET_KEY"
-//                 aws configure set region "${params.region}"
-                
-//                 aws eks update-kubeconfig --name ${params.cluster} --region ${params.region}
-                
-//                  """
-//             }
-//         } 
-//         stage('Deployment on Eks Cluster'){
-//              when {
-//               expression { params.action == 'create' }
-//           }
-//              steps{
-//                 sh """
-//                  cd kubefiles/
-//                   kubectl apply -f .
-//                  """
-//                  }
-//         }
-//         stage('Delete Deployment on Eks Cluster'){
-//              when {
-//               expression { params.action == 'destroy' }
-//              }
-//              steps{
-//                 sh """
-//                   cd kubefiles/
-//                   kubectl delete -f .
-//                   """
-//              }
-//         }     
      }
  }
 
