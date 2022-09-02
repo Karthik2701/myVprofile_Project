@@ -10,8 +10,8 @@ pipeline {
 	    NEXUS_REPOGRP_ID    = "vpro-maven-group"
         NEXUS_CREDENTIAL_ID = "nexus_login"
         ARTVERSION = "${env.BUILD_ID}"
-        ACCESS_KEY = credentials('AWS_ACCESS_KEY_ID')
-        SECRET_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        ACCESS_KEY = credentials('AKIA47Z2UGKFSPRGPXFF')
+        SECRET_KEY = credentials('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')
     }
 
     stages{
